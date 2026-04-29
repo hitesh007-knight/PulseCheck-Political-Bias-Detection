@@ -1,8 +1,17 @@
-"""Train bias classifier on improved_political_dataset.csv."""
+"""Train bias classifier on the political dataset.
 
-import joblib
+Usage (run from project root):
+    python scripts/train.py
+"""
+
+import sys
 from pathlib import Path
 
+# Ensure the project root is on sys.path so pulsecheck is importable
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+import joblib
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -11,11 +20,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.svm import LinearSVC
 
-from pulsecheck.config import ARTIFACTS_DIR, CLASSIFIER_FILE, LABEL_ENCODER_FILE, VECTORIZER_FILE
+from pulsecheck.config import MODELS_DIR, CLASSIFIER_FILE, LABEL_ENCODER_FILE, VECTORIZER_FILE, DATASET_FILE
 
 # Load dataset
 print("Loading dataset...")
-df = pd.read_csv("improved_political_dataset.csv")
+df = pd.read_csv(DATASET_FILE)
 
 # Use Text column and Bias column
 X = df["Text"].values
@@ -51,10 +60,9 @@ print("\nClassification Report:")
 print(classification_report(y_test, y_pred, target_names=encoder.classes_))
 
 # Save artifacts
-ARTIFACTS_DIR.mkdir(exist_ok=True)
+MODELS_DIR.mkdir(exist_ok=True)
 joblib.dump(vectorizer, VECTORIZER_FILE)
 joblib.dump(classifier, CLASSIFIER_FILE)
 joblib.dump(encoder, LABEL_ENCODER_FILE)
 
-print(f"\nArtifacts saved to {ARTIFACTS_DIR.resolve()}/")
-
+print(f"\nModel artifacts saved to {MODELS_DIR.resolve()}/")

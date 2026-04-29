@@ -6,6 +6,7 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 ENV/
 build/
 develop-eggs/
@@ -44,8 +45,7 @@ Thumbs.db
 # Logs
 *.log
 
-# Model artifacts (keep these - they're needed!)
-# artifacts/
-# improved_political_dataset.csv
-
-
+# Model artifacts — keep tracked (needed to run)
+# models/
+# data/
+.venv_new

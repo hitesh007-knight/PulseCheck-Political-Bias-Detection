@@ -1,13 +1,15 @@
-"""Predict political bias using pre-trained model."""
+"""Predict political bias using pre-trained SVM model."""
+
+from typing import Dict
 
 import numpy as np
 
 from pulsecheck.artifacts import load_artifacts
 
 
-def predict_bias(text: str) -> dict:
+def predict_bias(text: str) -> Dict[str, float | str]:
     """
-    Predict bias label and confidence score.
+    Predict bias label and confidence score using SVM model.
     Returns dict with 'label' (left/center/right) and 'confidence' (0-1).
     """
     vectorizer, classifier, label_encoder = load_artifacts()
@@ -28,4 +30,4 @@ def predict_bias(text: str) -> dict:
     # Get label
     label = label_encoder.inverse_transform([prediction])[0]
     
-    return {"label": label, "confidence": confidence}
+    return {"label": label, "confidence": confidence, "model": "svm"}

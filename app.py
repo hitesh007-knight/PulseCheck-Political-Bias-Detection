@@ -12,21 +12,41 @@ CORS(app)
 
 @app.route("/analyze", methods=["POST"])
 def analyze_article():
-    """Analyze article from URL."""
+    """Analyze article from URL or raw text."""
     data = request.get_json()
     
-    if not data or "url" not in data:
-        return jsonify({"error": "Missing 'url' in request body"}), 400
+    if not data:
+        return jsonify({"error": "Missing request body"}), 400
+
+    url = data.get("url")
+    text = data.get("text")
+
+    if not url and not text:
+        return jsonify({"error": "Provide 'url' or 'text' in request body"}), 400
     
     try:
-        url = data["url"]
         summarize_flag = data.get("summarize", False)
-        
-        result = analyze(url, summarize_article=summarize_flag)
+        bias_model = data.get("bias_model", data.get("model", "svm"))
+        language_override = data.get("language_override")  # optional ISO code
+
+        result = analyze(
+            url=url,
+            text=text,
+            summarize_article=summarize_flag,
+            bias_model=bias_model,
+            language_override=language_override,
+        )
         
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/languages", methods=["GET"])
+def supported_languages():
+    """Return the list of languages supported for detection & translation."""
+    from pulsecheck.language import get_supported_languages
+    return jsonify(get_supported_languages()), 200
 
 
 @app.route("/health", methods=["GET"])
@@ -39,4 +59,3 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     debug = os.environ.get("FLASK_DEBUG", "False").lower() == "true"
     app.run(host="0.0.0.0", port=port, debug=debug)
-
