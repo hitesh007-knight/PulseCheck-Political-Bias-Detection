@@ -110,14 +110,22 @@ if st.button("🔍 Analyze Article", type="primary", use_container_width=True):
                 response = requests.post(
                     f"{backend_url}/analyze",
                     json=payload,
-                    timeout=180,
+                    timeout=300,  # 5 min to handle Render free-tier cold starts
                 )
                 
                 if response.status_code == 200:
                     result = response.json()
                     st.session_state["result"] = result
                 else:
-                    st.error(f"Error: {response.json().get('error', 'Unknown error')}")
+                    try:
+                        err_msg = response.json().get('error', 'Unknown error')
+                    except ValueError:
+                        err_msg = f"Server returned status {response.status_code}. The backend may be starting up — try again in 30 seconds."
+                    st.error(f"Error: {err_msg}")
+            except requests.exceptions.ConnectionError:
+                st.error("❌ Cannot reach the backend. Make sure the Backend URL in the sidebar is correct and the server is running.")
+            except requests.exceptions.Timeout:
+                st.error("⏱️ Request timed out. The backend may be cold-starting on Render's free tier — please try again in 30-60 seconds.")
             except requests.exceptions.RequestException as e:
                 st.error(f"Failed to connect to backend: {e}")
 

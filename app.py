@@ -10,6 +10,20 @@ app = Flask(__name__)
 CORS(app)
 
 
+@app.route("/", methods=["GET"])
+def index():
+    """Root endpoint — confirms the API is live."""
+    return jsonify({
+        "service": "PulseCheck API",
+        "status": "running",
+        "endpoints": {
+            "POST /analyze": "Analyze article for political bias",
+            "GET /languages": "List supported languages",
+            "GET /health": "Health check",
+        }
+    }), 200
+
+
 @app.route("/analyze", methods=["POST"])
 def analyze_article():
     """Analyze article from URL or raw text."""
